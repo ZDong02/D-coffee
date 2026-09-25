@@ -1,0 +1,21 @@
+# Java / Maven
+**/target/
+**/.mvn/wrapper/maven-wrapper.jar
+
+# JavaScript
+**/node_modules/
+**/dist/
+d-coffee-front/unpackage/
+
+# Local configuration and secrets
+**/.env.local
+**/.env.*.local
+**/application-local.properties
+**/uploads/
+**/logs/
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

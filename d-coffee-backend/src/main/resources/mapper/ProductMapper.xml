@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dcoffee.mapper.ProductMapper">
+    <resultMap id="productMap" type="com.dcoffee.vo.ProductView">
+        <id property="id" column="id"/>
+        <result property="categoryId" column="category_id"/>
+        <result property="categoryName" column="category_name"/>
+        <result property="productCode" column="product_code"/>
+        <result property="name" column="name"/>
+        <result property="description" column="description"/>
+        <result property="imageUrl" column="image_url"/>
+        <result property="price" column="price"/>
+        <result property="originalPrice" column="original_price"/>
+        <result property="stock" column="stock"/>
+        <result property="salesCount" column="sales_count"/>
+        <result property="recommended" column="is_recommended"/>
+        <result property="isNew" column="is_new"/>
+        <result property="status" column="status"/>
+        <result property="sort" column="sort"/>
+    </resultMap>
+    <resultMap id="optionMap" type="com.dcoffee.vo.ProductOptionView">
+        <id property="id" column="option_id"/>
+        <result property="code" column="option_code"/>
+        <result property="name" column="option_name"/>
+        <result property="selectionType" column="selection_type"/>
+        <result property="required" column="is_required"/>
+        <result property="minSelect" column="min_select"/>
+        <result property="maxSelect" column="max_select"/>
+        <result property="sort" column="option_sort"/>
+        <collection property="values" ofType="com.dcoffee.vo.OptionValueView">
+            <id property="id" column="value_id"/>
+            <result property="code" column="value_code"/>
+            <result property="name" column="value_name"/>
+            <result property="priceDelta" column="price_delta"/>
+            <result property="sort" column="value_sort"/>
+        </collection>
+    </resultMap>
+    <resultMap id="extraMap" type="com.dcoffee.vo.ProductExtraView">
+        <id property="id" column="id"/>
+        <result property="code" column="extra_code"/>
+        <result property="name" column="name"/>
+        <result property="price" column="price"/>
+        <result property="stock" column="stock"/>
+        <result property="sort" column="sort"/>
+    </resultMap>
+
+    <select id="findActiveCategories" resultType="com.dcoffee.vo.CategoryView">
+        SELECT id, category_code AS code, name, icon_url, sort
+        FROM dc_category WHERE status = 'ACTIVE' AND deleted = 0 ORDER BY sort, id
+    </select>
+
+    <sql id="productFilters">
+        p.deleted = 0
+        <if test="status != null and status != ''">AND p.status = #{status}</if>
+        <if test="status == 'ON_SALE'">AND c.status = 'ACTIVE'</if>
+        <if test="categoryId != null">AND p.category_id = #{categoryId}</if>
+        <if test="recommended != null">AND p.is_recommended = #{recommended}</if>
+        <if test="keyword != null and keyword != ''">
+            AND (p.name LIKE CONCAT('%', #{keyword}, '%') OR p.product_code LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+    </sql>
+    <select id="findProducts" resultMap="productMap">
+        SELECT p.*, c.name AS category_name FROM dc_product p
+        JOIN dc_category c ON c.id = p.category_id AND c.deleted = 0
+        WHERE <include refid="productFilters"/>
+        ORDER BY p.sort, p.id DESC LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+    <select id="countProducts" resultType="long">
+        SELECT COUNT(*) FROM dc_product p JOIN dc_category c ON c.id = p.category_id AND c.deleted = 0
+        WHERE <include refid="productFilters"/>
+    </select>
+    <select id="findProductById" resultMap="productMap">
+        SELECT p.*, c.name AS category_name FROM dc_product p
+        JOIN dc_category c ON c.id = p.category_id AND c.deleted = 0
+        WHERE p.id = #{id} AND p.deleted = 0
+        <if test="publicOnly">AND p.status = 'ON_SALE' AND c.status = 'ACTIVE'</if>
+    </select>
+    <select id="findOptions" resultMap="optionMap">
+        SELECT o.id AS option_id, o.option_code, o.name AS option_name, o.selection_type,
+               o.is_required, o.min_select, o.max_select, o.sort AS option_sort,
+               v.id AS value_id, v.value_code, v.name AS value_name, v.price_delta, v.sort AS value_sort
+        FROM dc_product_option o LEFT JOIN dc_product_option_value v
+          ON v.option_id = o.id AND v.status = 'ACTIVE' AND v.deleted = 0
+        WHERE o.product_id = #{productId} AND o.status = 'ACTIVE' AND o.deleted = 0
+        ORDER BY o.sort, o.id, v.sort, v.id
+    </select>
+    <select id="findExtras" resultMap="extraMap">
+        SELECT id, extra_code, name, price, stock, sort FROM dc_product_extra
+        WHERE product_id = #{productId} AND status = 'ACTIVE' AND deleted = 0
+        ORDER BY sort, id
+    </select>
+    <select id="categoryExists" resultType="boolean">
+        SELECT EXISTS(SELECT 1 FROM dc_category WHERE id = #{categoryId} AND status = 'ACTIVE' AND deleted = 0)
+    </select>
+    <select id="productExists" resultType="boolean">
+        SELECT EXISTS(SELECT 1 FROM dc_product WHERE id = #{id} AND deleted = 0)
+    </select>
+    <insert id="insertProduct" useGeneratedKeys="true" keyProperty="product.id">
+        INSERT INTO dc_product
+            (category_id, product_code, name, description, image_url, price, original_price, stock,
+             is_recommended, is_new, status, sort)
+        VALUES
+            (#{product.categoryId}, #{product.productCode}, #{product.name}, #{product.description},
+             #{product.imageUrl}, #{product.price}, #{product.originalPrice}, #{product.stock},
+             #{product.recommended}, #{product.isNew}, 'DRAFT', #{product.sort})
+    </insert>
+    <update id="deactivateOptionValues">
+        UPDATE dc_product_option_value v
+        JOIN dc_product_option o ON o.id = v.option_id
+        SET v.deleted = 1, v.status = 'INACTIVE'
+        WHERE o.product_id = #{productId}
+    </update>
+    <update id="deactivateOptionGroups">
+        UPDATE dc_product_option SET deleted = 1, status = 'INACTIVE' WHERE product_id = #{productId}
+    </update>
+    <update id="deactivateExtras">
+        UPDATE dc_product_extra SET deleted = 1, status = 'INACTIVE' WHERE product_id = #{productId}
+    </update>
+    <insert id="upsertOptionGroup">
+        INSERT INTO dc_product_option
+            (product_id, option_code, name, selection_type, is_required, min_select, max_select, sort, status, deleted)
+        VALUES
+            (#{productId}, #{option.code}, #{option.name}, #{option.selectionType}, #{option.required},
+             #{option.minSelect}, #{option.maxSelect}, #{option.sort}, 'ACTIVE', 0)
+        ON DUPLICATE KEY UPDATE name = VALUES(name), selection_type = VALUES(selection_type),
+            is_required = VALUES(is_required), min_select = VALUES(min_select), max_select = VALUES(max_select),
+            sort = VALUES(sort), status = 'ACTIVE', deleted = 0
+    </insert>
+    <select id="findOptionId" resultType="long">
+        SELECT id FROM dc_product_option WHERE product_id = #{productId} AND option_code = #{code}
+    </select>
+    <insert id="upsertOptionValue">
+        INSERT INTO dc_product_option_value
+            (option_id, value_code, name, price_delta, sort, status, deleted)
+        VALUES
+            (#{optionId}, #{value.code}, #{value.name}, #{value.priceDelta}, #{value.sort}, 'ACTIVE', 0)
+        ON DUPLICATE KEY UPDATE name = VALUES(name), price_delta = VALUES(price_delta),
+            sort = VALUES(sort), status = 'ACTIVE', deleted = 0
+    </insert>
+    <insert id="upsertExtra">
+        INSERT INTO dc_product_extra
+            (product_id, extra_code, name, price, stock, sort, status, deleted)
+        VALUES
+            (#{productId}, #{extra.code}, #{extra.name}, #{extra.price}, #{extra.stock}, #{extra.sort}, 'ACTIVE', 0)
+        ON DUPLICATE KEY UPDATE name = VALUES(name), price = VALUES(price), stock = VALUES(stock),
+            sort = VALUES(sort), status = 'ACTIVE', deleted = 0
+    </insert>
+    <update id="updateProduct">
+        UPDATE dc_product SET category_id = #{product.categoryId}, product_code = #{product.productCode},
+            name = #{product.name}, description = #{product.description}, image_url = #{product.imageUrl},
+            price = #{product.price}, original_price = #{product.originalPrice},
+            is_recommended = #{product.recommended}, is_new = #{product.isNew}, sort = #{product.sort}
+        WHERE id = #{id} AND deleted = 0
+    </update>
+    <update id="updateStatus">
+        UPDATE dc_product SET status = #{status} WHERE id = #{id} AND deleted = 0
+    </update>
+    <select id="getStock" resultType="int">
+        SELECT stock FROM dc_product WHERE id = #{id} AND deleted = 0 FOR UPDATE
+    </select>
+    <update id="adjustStock">
+        UPDATE dc_product SET stock = stock + #{delta}
+        WHERE id = #{id} AND deleted = 0 AND stock + #{delta} &gt;= 0
+    </update>
+    <insert id="insertInventoryLog">
+        INSERT INTO dc_inventory_log (product_id, admin_id, quantity_delta, stock_before, stock_after, reason)
+        VALUES (#{productId}, #{adminId}, #{delta}, #{beforeStock}, #{afterStock}, #{reason})
+    </insert>
+</mapper>

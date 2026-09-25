@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dcoffee.mapper.StoreMapper">
+    <select id="findAvailableStores" resultType="com.dcoffee.vo.StoreView">
+        SELECT id, store_code AS code, name, address, phone,
+               TIME_FORMAT(open_time, '%H:%i') AS open_time,
+               TIME_FORMAT(close_time, '%H:%i') AS close_time, status
+        FROM dc_store
+        WHERE status IN ('OPEN', 'CLOSED') AND deleted = 0
+        ORDER BY CASE status WHEN 'OPEN' THEN 0 ELSE 1 END, sort, id
+    </select>
+</mapper>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dcoffee.mapper.UserAuthMapper">
+    <resultMap id="userMap" type="com.dcoffee.mapper.UserAuthMapper$UserRecord">
+        <id property="id" column="id"/>
+        <result property="phone" column="phone"/>
+        <result property="passwordHash" column="password_hash"/>
+        <result property="nickname" column="nickname"/>
+        <result property="status" column="status"/>
+    </resultMap>
+
+    <select id="findByPhone" resultMap="userMap">
+        SELECT id, phone, password_hash, nickname, status
+        FROM dc_user
+        WHERE phone = #{phone} AND deleted = 0
+        LIMIT 1
+    </select>
+
+    <insert id="insertUser">
+        INSERT INTO dc_user (phone, password_hash, nickname, status)
+        VALUES (#{phone}, #{passwordHash}, #{nickname}, 'ACTIVE')
+    </insert>
+</mapper>

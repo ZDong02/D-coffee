@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dcoffee.mapper.CartMapper">
+    <select id="findStore" resultType="com.dcoffee.vo.StoreView">
+        SELECT id, store_code AS code, name, address, phone,
+               TIME_FORMAT(open_time, '%H:%i') AS open_time,
+               TIME_FORMAT(close_time, '%H:%i') AS close_time, status
+        FROM dc_store WHERE id = #{storeId} AND status IN ('OPEN', 'CLOSED') AND deleted = 0
+    </select>
+    <select id="findCartId" resultType="long">
+        SELECT id FROM dc_cart WHERE user_id = #{userId} AND store_id = #{storeId} AND deleted = 0
+        ORDER BY id DESC LIMIT 1
+    </select>
+    <insert id="insertCart" useGeneratedKeys="true" keyProperty="cartId" keyColumn="id">
+        INSERT INTO dc_cart (user_id, store_id, deleted) VALUES (#{userId}, #{storeId}, 0)
+    </insert>
+    <select id="findItemId" resultType="long">
+        SELECT id FROM dc_cart_item
+        WHERE cart_id = #{cartId} AND product_id = #{productId}
+          AND option_signature = #{signature} AND deleted = 0
+        LIMIT 1
+    </select>
+    <select id="findDeletedItemId" resultType="long">
+        SELECT id FROM dc_cart_item
+        WHERE cart_id = #{cartId} AND product_id = #{productId}
+          AND option_signature = #{signature} AND deleted = 1
+        LIMIT 1
+    </select>
+    <insert id="insertItem" useGeneratedKeys="true" keyProperty="itemId" keyColumn="id">
+        INSERT INTO dc_cart_item (cart_id, product_id, option_signature, quantity, deleted)
+        VALUES (#{cartId}, #{productId}, #{signature}, #{quantity}, 0)
+    </insert>
+    <update id="addItemQuantity">
+        UPDATE dc_cart_item SET quantity = quantity + 1
+        WHERE id = #{itemId} AND cart_id = #{cartId} AND deleted = 0 AND quantity &lt; 99
+    </update>
+    <update id="restoreItem">
+        UPDATE dc_cart_item SET quantity = 1, deleted = 0
+        WHERE id = #{itemId} AND cart_id = #{cartId} AND deleted = 1
+    </update>
+    <insert id="insertItemOption">
+        INSERT INTO dc_cart_item_option
+            (cart_item_id, selection_type, option_group_name, selected_name, catalog_value_id, price_delta, deleted)
+        VALUES
+            (#{itemId}, #{selectionType}, #{groupName}, #{selectedName}, #{catalogValueId}, #{priceDelta}, 0)
+    </insert>
+    <select id="findItems" resultType="com.dcoffee.vo.CartItemView">
+        SELECT i.id, i.product_id, p.name AS product_name, p.image_url,
+               p.price AS base_price, i.quantity
+        FROM dc_cart_item i
+        JOIN dc_cart c ON c.id = i.cart_id AND c.user_id = #{userId} AND c.deleted = 0
+        JOIN dc_product p ON p.id = i.product_id
+        WHERE i.cart_id = #{cartId} AND i.deleted = 0
+        ORDER BY i.id DESC
+    </select>
+    <select id="findItemOptions" resultType="com.dcoffee.vo.CartOptionView">
+        SELECT o.id, o.selection_type, o.option_group_name AS group_name,
+               o.selected_name, o.price_delta
+        FROM dc_cart_item_option o
+        JOIN dc_cart_item i ON i.id = o.cart_item_id AND i.deleted = 0
+        JOIN dc_cart c ON c.id = i.cart_id AND c.user_id = #{userId} AND c.deleted = 0
+        WHERE o.cart_item_id = #{itemId} AND o.deleted = 0
+        ORDER BY o.selection_type, o.id
+    </select>
+    <update id="updateQuantity">
+        UPDATE dc_cart_item i JOIN dc_cart c ON c.id = i.cart_id
+        SET i.quantity = #{quantity}
+        WHERE i.id = #{itemId} AND c.user_id = #{userId} AND i.deleted = 0 AND c.deleted = 0
+    </update>
+    <update id="softDeleteItemOptions">
+        UPDATE dc_cart_item_option o
+        JOIN dc_cart_item i ON i.id = o.cart_item_id
+        JOIN dc_cart c ON c.id = i.cart_id
+        SET o.deleted = 1
+        WHERE o.cart_item_id = #{itemId} AND c.user_id = #{userId} AND o.deleted = 0
+    </update>
+    <update id="softDeleteItem">
+        UPDATE dc_cart_item i JOIN dc_cart c ON c.id = i.cart_id
+        SET i.deleted = 1
+        WHERE i.id = #{itemId} AND c.user_id = #{userId} AND i.deleted = 0 AND c.deleted = 0
+    </update>
+</mapper>

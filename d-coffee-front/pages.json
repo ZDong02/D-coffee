@@ -1,0 +1,42 @@
+{
+	"pages": [
+		{
+			"path": "pages/index/index",
+			"style": {
+				"navigationBarTitleText": "D-coffee"
+			}
+		},
+		{
+			"path": "pages/product/detail",
+			"style": {
+				"navigationBarTitleText": "商品详情",
+				"enablePullDownRefresh": false
+			}
+		},
+		{
+			"path": "pages/account/index",
+			"style": {
+				"navigationBarTitleText": "我的账户"
+			}
+		},
+		{
+			"path": "pages/store/index",
+			"style": {
+				"navigationBarTitleText": "选择门店"
+			}
+		},
+		{
+			"path": "pages/cart/index",
+			"style": {
+				"navigationBarTitleText": "购物车"
+			}
+		}
+	],
+	"globalStyle": {
+		"navigationBarTextStyle": "black",
+		"navigationBarTitleText": "D-coffee",
+		"navigationBarBackgroundColor": "#F7F3ED",
+		"backgroundColor": "#F7F3ED"
+	},
+	"uniIdRouter": {}
+}

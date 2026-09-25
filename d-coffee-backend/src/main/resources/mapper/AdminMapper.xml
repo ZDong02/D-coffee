@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dcoffee.mapper.AdminMapper">
+    <resultMap id="adminLoginMap" type="com.dcoffee.mapper.AdminMapper$AdminLoginRecord">
+        <id property="id" column="id"/>
+        <result property="username" column="username"/>
+        <result property="passwordHash" column="password_hash"/>
+        <result property="displayName" column="display_name"/>
+        <result property="role" column="role_code"/>
+    </resultMap>
+
+    <select id="findActiveAdmin" resultMap="adminLoginMap">
+        SELECT a.id, a.username, a.password_hash, a.display_name, r.role_code
+        FROM dc_admin a
+        JOIN dc_admin_role r ON r.id = a.role_id AND r.status = 'ACTIVE' AND r.deleted = 0
+        WHERE a.username = #{username} AND a.status = 'ACTIVE' AND a.deleted = 0
+        LIMIT 1
+    </select>
+
+    <update id="updateLastLogin">
+        UPDATE dc_admin SET last_login_at = CURRENT_TIMESTAMP
+        WHERE id = #{id} AND status = 'ACTIVE' AND deleted = 0
+    </update>
+</mapper>

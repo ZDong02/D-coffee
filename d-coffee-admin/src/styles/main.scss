@@ -1,0 +1,152 @@
+:root {
+  font-family: Inter, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  color: #38271d;
+  background: #f7f3ed;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+}
+
+.admin-shell {
+  min-height: 100vh;
+
+  &__aside {
+    position: relative;
+    border-right: 1px solid #e7ded4;
+    background: #fcfaf7;
+  }
+
+  &__header {
+    display: flex;
+    height: 104px;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #e7ded4;
+    background: #fffdfa;
+  }
+
+  &__header h1 {
+    margin: 4px 0 0;
+    font-size: 20px;
+    font-weight: 600;
+  }
+
+  &__main {
+    padding: 32px;
+  }
+}
+
+.brand {
+  display: flex;
+  height: 84px;
+  align-items: center;
+  gap: 12px;
+  padding: 0 24px;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 20px;
+  font-weight: 600;
+
+  &__mark {
+    display: grid;
+    width: 34px;
+    height: 34px;
+    place-items: center;
+    border: 1px solid #806652;
+    border-radius: 50%;
+    color: #563b2b;
+  }
+}
+
+.admin-menu {
+  border-right: 0;
+  background: transparent;
+}
+
+.aside-note {
+  position: absolute;
+  bottom: 24px;
+  padding: 0 24px;
+  color: #9a8a7c;
+  font-size: 12px;
+}
+
+.header-eyebrow,
+.welcome-panel__eyebrow {
+  color: #9a806c;
+  font-size: 11px;
+  letter-spacing: 1.6px;
+}
+
+.welcome-panel {
+  display: flex;
+  max-width: 920px;
+  min-height: 220px;
+  align-items: center;
+  gap: 24px;
+  padding: 40px;
+  border: 1px solid #e7ded4;
+  border-radius: 10px;
+  background: #fffdfa;
+
+  &__icon {
+    display: grid;
+    width: 64px;
+    height: 64px;
+    flex: 0 0 auto;
+    place-items: center;
+    border-radius: 50%;
+    background: #f1e8de;
+    color: #72553f;
+    font-size: 28px;
+  }
+
+  &__eyebrow {
+    margin: 0 0 10px;
+  }
+
+  h2 {
+    margin: 0;
+    font-size: 23px;
+    font-weight: 600;
+  }
+
+  &__copy {
+    margin: 12px 0 0;
+    color: #88796e;
+    line-height: 1.7;
+  }
+}
+
+@media (max-width: 720px) {
+  .admin-shell__aside {
+    width: 68px !important;
+  }
+
+  .brand {
+    padding: 0 16px;
+
+    span:last-child,
+    & + .admin-menu span,
+    ~ .aside-note {
+      display: none;
+    }
+  }
+
+  .admin-shell__main {
+    padding: 18px;
+  }
+
+  .welcome-panel {
+    align-items: flex-start;
+    padding: 24px;
+  }
+}
