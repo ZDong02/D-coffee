@@ -2,6 +2,9 @@
 import { computed, onMounted, ref } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { getCategories, getProducts } from '../../services/request.js'
+import TabBar from '../../components/TabBar.vue'
+import ProductSkeleton from '../../components/ProductSkeleton.vue'
+import EmptyState from '../../components/EmptyState.vue'
 
 const categories = ref([])
 const products = ref([])
@@ -105,19 +108,23 @@ onShow(refreshAccountLabel)
       <text v-if="hasLoaded && !loading" class="section-heading__count">{{ products.length }} 款</text>
     </view>
 
-    <view v-if="loading && !hasLoaded" class="state-card">
-      <text class="state-card__title">正在准备菜单</text>
-      <text class="state-card__description">请稍等片刻…</text>
+    <view v-if="loading && !hasLoaded" class="product-grid">
+      <ProductSkeleton v-for="i in 6" :key="i" />
     </view>
-    <view v-else-if="errorMessage" class="state-card">
-      <text class="state-card__title">菜单暂时不可用</text>
-      <text class="state-card__description">{{ errorMessage }}</text>
-      <text class="retry-button" @tap="loadCatalog">重新加载</text>
-    </view>
-    <view v-else-if="!loading && hasLoaded && products.length === 0" class="state-card">
-      <text class="state-card__title">这里还没有商品</text>
-      <text class="state-card__description">换个分类看看，或稍后再来。</text>
-    </view>
+    <EmptyState
+      v-else-if="errorMessage"
+      icon="⚠️"
+      title="菜单暂时不可用"
+      :description="errorMessage"
+      action-text="重新加载"
+      @action="loadCatalog"
+    />
+    <EmptyState
+      v-else-if="!loading && hasLoaded && products.length === 0"
+      icon="🔍"
+      title="这里还没有商品"
+      description="换个分类看看，或稍后再来。"
+    />
     <view v-else class="product-grid">
       <view v-for="product in products" :key="product.id" class="product-card" @tap="openProduct(product)">
         <view class="product-card__image-wrap">
@@ -137,26 +144,69 @@ onShow(refreshAccountLabel)
         </view>
       </view>
     </view>
+    <TabBar />
   </view>
 </template>
 
 <style lang="scss" scoped>
-.menu-page { min-height: 100vh; padding: 52rpx 36rpx 80rpx; box-sizing: border-box; }
+.menu-page { min-height: 100vh; padding: 52rpx 36rpx 180rpx; box-sizing: border-box; }
 .hero { padding: 42rpx 36rpx 48rpx; border-radius: 24rpx; background: #eee5d9; }
 .hero__eyebrow, .section-heading__eyebrow { display: block; color: #896d57; font-size: 18rpx; letter-spacing: 4rpx; }
 .hero__title { display: block; margin-top: 25rpx; color: #39291f; font-size: 42rpx; font-weight: 600; }
 .hero__title text { color: #805d43; }
 .hero__description { display: block; margin-top: 16rpx; color: #817366; font-size: 24rpx; }
-.account-link { display: inline-block; margin-top: 26rpx; padding: 12rpx 22rpx; border: 1rpx solid #cdbca9; border-radius: 24rpx; color: #624a37; font-size: 20rpx; }
+.account-link {
+  display: inline-block;
+  margin-top: 26rpx;
+  padding: 12rpx 22rpx;
+  border: 1rpx solid #cdbca9;
+  border-radius: 24rpx;
+  color: #624a37;
+  font-size: 20rpx;
+  transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:active {
+    background: #e8dfd5;
+    transform: scale(0.96);
+  }
+}
 .account-link--secondary { margin-left: 12rpx; }
 .category-strip { display: flex; gap: 16rpx; overflow-x: auto; padding: 34rpx 0 12rpx; white-space: nowrap; }
-.category-chip { flex: none; padding: 15rpx 25rpx; border: 1rpx solid #e5dbd0; border-radius: 30rpx; color: #705d4e; font-size: 23rpx; }
-.category-chip--active { border-color: #513827; background: #513827; color: #fffaf4; }
+.category-chip {
+  flex: none;
+  padding: 15rpx 25rpx;
+  border: 1rpx solid #e5dbd0;
+  border-radius: 30rpx;
+  color: #705d4e;
+  font-size: 23rpx;
+  transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+.category-chip--active {
+  border-color: #513827;
+  background: #513827;
+  color: #fffaf4;
+  font-weight: 600;
+}
 .section-heading { display: flex; align-items: flex-end; justify-content: space-between; margin: 34rpx 0 22rpx; }
 .section-heading__title { display: block; margin-top: 8rpx; color: #39291f; font-size: 34rpx; font-weight: 600; }
 .section-heading__count { color: #978a7d; font-size: 22rpx; }
 .product-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22rpx; }
-.product-card { overflow: hidden; border-radius: 18rpx; background: #fffdfa; box-shadow: 0 5rpx 22rpx rgba(63, 45, 31, .06); }
+.product-card {
+  overflow: hidden;
+  border-radius: 18rpx;
+  background: #fffdfa;
+  box-shadow: 0 5rpx 22rpx rgba(63, 45, 31, .06);
+  transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:active {
+    transform: scale(0.98);
+    box-shadow: 0 3rpx 16rpx rgba(63, 45, 31, .08);
+  }
+}
 .product-card__image-wrap { position: relative; height: 250rpx; background: #eee7df; }
 .product-card__image { width: 100%; height: 100%; }
 .product-card__image-placeholder { display: flex; width: 100%; height: 100%; align-items: center; justify-content: center; color: #9b7e64; font-family: Georgia, serif; font-size: 72rpx; }
@@ -168,8 +218,4 @@ onShow(refreshAccountLabel)
 .product-card__footer { display: flex; align-items: center; justify-content: space-between; margin-top: 17rpx; }
 .product-card__price { color: #543b29; font-size: 27rpx; font-weight: 600; }
 .product-card__soldout, .product-card__recommend { color: #9d8a79; font-size: 17rpx; }
-.state-card { display: flex; min-height: 270rpx; flex-direction: column; align-items: center; justify-content: center; padding: 28rpx; border-radius: 18rpx; background: #fffdfa; text-align: center; }
-.state-card__title { color: #48362a; font-size: 28rpx; font-weight: 600; }
-.state-card__description { margin-top: 14rpx; color: #998b7d; font-size: 21rpx; }
-.retry-button { margin-top: 25rpx; padding: 12rpx 30rpx; border-radius: 24rpx; background: #513827; color: white; font-size: 21rpx; }
 </style>

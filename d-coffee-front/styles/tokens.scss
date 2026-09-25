@@ -1,0 +1,83 @@
+// D-Coffee 设计令牌
+// 咖啡主题色彩系统 - 温暖、专业、舒适
+
+// 品牌色
+$primary: #513827;
+$primary-light: #6b4a34;
+$primary-dark: #39291f;
+
+// 强调色
+$accent: #805d43;
+$accent-light: #9a7656;
+
+// 背景色
+$bg-main: #f7f3ed;
+$bg-card: #fffdfa;
+$bg-elevated: #eee5d9;
+$bg-overlay: rgba(255, 253, 250, 0.98);
+
+// 文字色
+$text-primary: #39291f;
+$text-secondary: #604c3c;
+$text-tertiary: #918477;
+$text-hint: #a09284;
+
+// 边框色
+$border-light: #f0e9e1;
+$border-default: #e8dfd5;
+$border-medium: #d8cabc;
+$border-dark: #cdbca9;
+
+// 状态色
+$success: #55825f;
+$warning: #8b6943;
+$error: #bc5b4c;
+$info: #896d57;
+
+// 间距系统（rpx）
+$space-xs: 8rpx;
+$space-sm: 12rpx;
+$space-md: 16rpx;
+$space-lg: 24rpx;
+$space-xl: 32rpx;
+$space-2xl: 48rpx;
+
+// 圆角
+$radius-sm: 12rpx;
+$radius-md: 16rpx;
+$radius-lg: 18rpx;
+$radius-xl: 24rpx;
+$radius-round: 999rpx;
+
+// 阴影
+$shadow-sm: 0 5rpx 22rpx rgba(63, 45, 31, 0.06);
+$shadow-md: 0 8rpx 28rpx rgba(63, 45, 31, 0.08);
+$shadow-lg: 0 12rpx 34rpx rgba(63, 45, 31, 0.1);
+$shadow-top: 0 -5rpx 20rpx rgba(63, 45, 31, 0.06);
+
+// 字体大小
+$text-xs: 16rpx;
+$text-sm: 18rpx;
+$text-base: 20rpx;
+$text-md: 22rpx;
+$text-lg: 24rpx;
+$text-xl: 28rpx;
+$text-2xl: 34rpx;
+$text-3xl: 38rpx;
+$text-4xl: 42rpx;
+
+// 过渡动效
+$transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+$transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+$transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+
+// 触摸目标最小尺寸
+$touch-target-min: 44px; // 88rpx
+
+// Z-index 层级
+$z-dropdown: 100;
+$z-sticky: 200;
+$z-fixed: 300;
+$z-modal-backdrop: 400;
+$z-modal: 500;
+$z-toast: 600;

@@ -1,6 +1,8 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import { getStores } from '../../services/request.js'
+import TabBar from '../../components/TabBar.vue'
+import EmptyState from '../../components/EmptyState.vue'
 
 const stores = ref([])
 const selectedStore = ref(uni.getStorageSync('dcoffee-store') || null)
@@ -39,12 +41,24 @@ onMounted(loadStores)
       <text class="intro-title">选择取餐门店</text>
       <text class="intro-copy">购物车会按门店分别保存，请选择计划取餐的门店。</text>
     </view>
-    <view v-if="loading" class="state-card">正在加载门店…</view>
-    <view v-else-if="errorMessage" class="state-card">
-      <text>{{ errorMessage }}</text>
-      <text class="retry-button" @tap="loadStores">重新加载</text>
+    <view v-if="loading" class="loading-state">
+      <text class="loading-spinner">⏳</text>
+      <text>正在加载门店…</text>
     </view>
-    <view v-else-if="!stores.length" class="state-card">目前没有可选门店，请稍后再试。</view>
+    <EmptyState
+      v-else-if="errorMessage"
+      icon="⚠️"
+      title="门店信息加载失败"
+      :description="errorMessage"
+      action-text="重新加载"
+      @action="loadStores"
+    />
+    <EmptyState
+      v-else-if="!stores.length"
+      icon="📍"
+      title="目前没有可选门店"
+      description="请稍后再试。"
+    />
     <view v-else class="store-list">
       <view v-for="store in stores" :key="store.id" class="store-card" @tap="chooseStore(store)">
         <view class="store-card__heading">
@@ -59,23 +73,50 @@ onMounted(loadStores)
       </view>
     </view>
     <text class="notice">未营业门店仅可预选和加入购物车，订单提交将在门店开放营业后支持。</text>
+    <TabBar />
   </view>
 </template>
 
 <style lang="scss" scoped>
-.store-page { min-height: 100vh; box-sizing: border-box; padding: 32rpx; background: #f7f3ed; }
+.store-page { min-height: 100vh; box-sizing: border-box; padding: 32rpx 32rpx 180rpx; background: #f7f3ed; }
 .intro-card, .store-card { padding: 30rpx; border-radius: 18rpx; background: #fffdfa; }
 .intro-title { display: block; color: #39291f; font-size: 30rpx; font-weight: 600; }
 .intro-copy { display: block; margin-top: 12rpx; color: #918477; font-size: 21rpx; line-height: 1.5; }
+.loading-state {
+  display: flex;
+  min-height: 45vh;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20rpx;
+  color: #887767;
+  font-size: 22rpx;
+  text-align: center;
+}
+.loading-spinner {
+  font-size: 60rpx;
+  animation: rotate 1s linear infinite;
+}
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
 .store-list { display: flex; flex-direction: column; gap: 16rpx; margin-top: 20rpx; }
-.store-card { position: relative; border: 1rpx solid #eee5da; }
+.store-card {
+  position: relative;
+  border: 1rpx solid #eee5da;
+  transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:active {
+    background: #f5f0ea;
+    transform: scale(0.99);
+  }
+}
 .store-card__heading { display: flex; align-items: center; justify-content: space-between; gap: 16rpx; }
 .store-name { color: #48362a; font-size: 27rpx; font-weight: 600; }
 .store-status { color: #a17c51; font-size: 19rpx; }
-.store-status--open { color: #55825f; }
+.store-status--open { color: #55825f; font-weight: 600; }
 .store-address, .store-hours { display: block; margin-top: 13rpx; color: #817366; font-size: 21rpx; line-height: 1.5; }
 .selected-label { display: inline-block; margin-top: 16rpx; padding: 7rpx 15rpx; border-radius: 20rpx; background: #eee5da; color: #654c36; font-size: 18rpx; }
 .notice { display: block; margin: 24rpx 8rpx; color: #a09284; font-size: 19rpx; line-height: 1.6; }
-.state-card { display: flex; min-height: 45vh; flex-direction: column; align-items: center; justify-content: center; gap: 20rpx; color: #887767; font-size: 22rpx; text-align: center; }
-.retry-button { padding: 12rpx 28rpx; border-radius: 26rpx; background: #513827; color: #fff; }
 </style>

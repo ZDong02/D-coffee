@@ -2,6 +2,8 @@
 import { computed, ref } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { createOrder, getCart, removeCartItem, updateCartItem } from '../../services/request.js'
+import TabBar from '../../components/TabBar.vue'
+import EmptyState from '../../components/EmptyState.vue'
 
 const cart = ref(null)
 const store = ref(uni.getStorageSync('dcoffee-store') || null)
@@ -94,18 +96,42 @@ onShow(loadCart)
       <text class="switch-store">更换 ›</text>
     </view>
     <view v-if="store?.status === 'CLOSED'" class="closed-notice">该门店当前未营业，购物车可预先保存，暂不能提交订单。</view>
-    <view v-if="loading" class="state-card">正在加载购物车…</view>
-    <view v-else-if="errorMessage" class="state-card">
-      <text>{{ errorMessage }}</text>
-      <text v-if="!uni.getStorageSync('dcoffee-user-token')" class="action-link" @tap="openLogin">去登录</text>
-      <text v-else-if="!store" class="action-link" @tap="openStorePicker">选择门店</text>
-      <text v-else class="action-link" @tap="loadCart">重新加载</text>
+    <view v-if="loading" class="loading-state">
+      <text class="loading-spinner">⏳</text>
+      <text>正在加载购物车…</text>
     </view>
-    <view v-else-if="!cart?.items?.length" class="state-card">
-      <text class="empty-icon">D</text><text class="empty-title">购物车还是空的</text>
-      <text class="empty-copy">去菜单挑一杯喜欢的咖啡吧。</text>
-      <text class="action-link" @tap="uni.navigateBack()">返回菜单</text>
-    </view>
+    <EmptyState
+      v-else-if="errorMessage && !uni.getStorageSync('dcoffee-user-token')"
+      icon="🔐"
+      title="请先登录"
+      description="登录后才能查看与管理你的购物车。"
+      action-text="去登录"
+      @action="openLogin"
+    />
+    <EmptyState
+      v-else-if="errorMessage && !store"
+      icon="📍"
+      title="请先选择门店"
+      description="购物车按门店分别保存，请先选择取餐门店。"
+      action-text="选择门店"
+      @action="openStorePicker"
+    />
+    <EmptyState
+      v-else-if="errorMessage"
+      icon="⚠️"
+      title="购物车暂时无法加载"
+      :description="errorMessage"
+      action-text="重新加载"
+      @action="loadCart"
+    />
+    <EmptyState
+      v-else-if="!cart?.items?.length"
+      icon="🛒"
+      title="购物车还是空的"
+      description="去菜单挑一杯喜欢的咖啡吧。"
+      action-text="返回菜单"
+      @action="uni.switchTab({ url: '/pages/index/index' })"
+    />
     <template v-else>
       <view class="item-list">
         <view v-for="item in cart.items" :key="item.id" class="cart-item">
@@ -135,6 +161,7 @@ onShow(loadCart)
       </view>
       <text class="checkout-note">提交后会创建待支付订单并预占库存；支付功能暂未接入。</text>
     </template>
+    <TabBar />
   </view>
 </template>
 

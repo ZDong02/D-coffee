@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { userLogin, userRegister } from '../../services/request.js'
+import TabBar from '../../components/TabBar.vue'
 
 const user = ref(uni.getStorageSync('dcoffee-user') || null)
 const isRegister = ref(false)
@@ -91,11 +92,12 @@ function logout() {
       </text>
       <text class="security-note">当前为开发阶段注册流程，尚未接入短信验证码；正式开放注册前应启用手机号验证。</text>
     </view>
+    <TabBar />
   </view>
 </template>
 
 <style lang="scss" scoped>
-.account-page { min-height: 100vh; box-sizing: border-box; padding: 60rpx 38rpx; background: #f7f3ed; }
+.account-page { min-height: 100vh; box-sizing: border-box; padding: 60rpx 38rpx 180rpx; background: #f7f3ed; }
 .account-brand { display: flex; align-items: center; gap: 14rpx; margin: 20rpx 0 50rpx; }
 .brand-mark { display: grid; width: 58rpx; height: 58rpx; place-items: center; border-radius: 50%; background: #513827; color: #fffaf4; font-family: Georgia, serif; font-size: 36rpx; }
 .brand-name { color: #725940; font-size: 20rpx; letter-spacing: 5rpx; }
@@ -104,12 +106,39 @@ function logout() {
 .welcome-title { display: block; margin-top: 18rpx; color: #39291f; font-size: 38rpx; font-weight: 600; }
 .welcome-copy, .account-phone { display: block; margin-top: 12rpx; color: #918477; font-size: 22rpx; }
 .form-label { display: block; margin: 27rpx 0 10rpx; color: #604c3c; font-size: 21rpx; }
-.form-input { box-sizing: border-box; width: 100%; height: 82rpx; padding: 0 22rpx; border: 1rpx solid #e8dfd5; border-radius: 12rpx; background: #fff; color: #39291f; font-size: 23rpx; }
-.primary-button { display: block; margin-top: 34rpx; padding: 23rpx; border-radius: 40rpx; background: #513827; color: #fffaf4; font-size: 23rpx; text-align: center; }
+.form-input { box-sizing: border-box; width: 100%; height: 82rpx; padding: 0 22rpx; border: 1rpx solid #e8dfd5; border-radius: 12rpx; background: #fff; color: #39291f; font-size: 23rpx; transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1); }
+.form-input:focus { border-color: #cdbca9; }
+.primary-button {
+  display: block;
+  margin-top: 34rpx;
+  padding: 23rpx;
+  border-radius: 40rpx;
+  background: #513827;
+  color: #fffaf4;
+  font-size: 23rpx;
+  text-align: center;
+  transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:active:not(.primary-button--disabled) {
+    background: #6b4a34;
+    transform: scale(0.98);
+  }
+}
 .primary-button--disabled { opacity: .6; }
 .logout-button { margin-top: 38rpx; }
 .orders-button { margin-top: 24rpx; background: #806449; }
-.switch-mode { display: block; margin-top: 25rpx; color: #805d43; font-size: 21rpx; text-align: center; }
+.switch-mode {
+  display: block;
+  margin-top: 25rpx;
+  color: #805d43;
+  font-size: 21rpx;
+  text-align: center;
+  transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:active {
+    opacity: 0.7;
+  }
+}
 .error-message { display: block; margin-top: 20rpx; color: #bc5b4c; font-size: 20rpx; }
 .security-note, .account-note { display: block; margin-top: 28rpx; color: #a09284; font-size: 18rpx; line-height: 1.6; }
 </style>

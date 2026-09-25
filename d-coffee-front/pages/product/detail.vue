@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
 import { addCartItem, getProduct } from '../../services/request.js'
+import EmptyState from '../../components/EmptyState.vue'
 
 const product = ref(null)
 const productId = ref('')
@@ -148,11 +149,18 @@ function formatPrice(price) {
 
 <template>
   <view class="detail-page">
-    <view v-if="loading" class="state-card">正在加载商品详情…</view>
-    <view v-else-if="errorMessage" class="state-card">
-      <text>{{ errorMessage }}</text>
-      <text class="retry-button" @tap="loadProduct(productId)">重新加载</text>
+    <view v-if="loading" class="loading-state">
+      <text class="loading-spinner">⏳</text>
+      <text>正在加载商品详情…</text>
     </view>
+    <EmptyState
+      v-else-if="errorMessage"
+      icon="⚠️"
+      title="商品详情加载失败"
+      :description="errorMessage"
+      action-text="重新加载"
+      @action="loadProduct(productId)"
+    />
     <template v-else-if="product">
       <view class="product-hero">
         <image v-if="product.imageUrl" class="product-image" :src="product.imageUrl" mode="aspectFill" />
@@ -225,6 +233,24 @@ function formatPrice(price) {
 
 <style lang="scss" scoped>
 .detail-page { min-height: 100vh; padding-bottom: 130rpx; background: #f7f3ed; color: #39291f; }
+.loading-state {
+  display: flex;
+  min-height: 55vh;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24rpx;
+  color: #79695b;
+  font-size: 23rpx;
+}
+.loading-spinner {
+  font-size: 60rpx;
+  animation: rotate 1s linear infinite;
+}
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
 .product-hero { height: 480rpx; background: #eee7df; }
 .product-image { width: 100%; height: 100%; }
 .product-image--empty { display: flex; align-items: center; justify-content: center; color: #9b7e64; font-family: Georgia, serif; font-size: 130rpx; }
@@ -238,8 +264,23 @@ function formatPrice(price) {
 .section-title { font-size: 28rpx; font-weight: 600; }
 .section-hint { color: #a09284; font-size: 20rpx; }
 .choice-list { display: flex; flex-wrap: wrap; gap: 16rpx; margin-top: 24rpx; }
-.choice-chip { display: flex; min-width: 140rpx; justify-content: center; gap: 8rpx; padding: 17rpx 20rpx; border: 1rpx solid #e8dfd5; border-radius: 12rpx; color: #665447; font-size: 22rpx; }
-.choice-chip--selected { border-color: #684a34; background: #f5eee7; color: #513827; }
+.choice-chip {
+  display: flex;
+  min-width: 140rpx;
+  justify-content: center;
+  gap: 8rpx;
+  padding: 17rpx 20rpx;
+  border: 1rpx solid #e8dfd5;
+  border-radius: 12rpx;
+  color: #665447;
+  font-size: 22rpx;
+  transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:active {
+    transform: scale(0.96);
+  }
+}
+.choice-chip--selected { border-color: #684a34; background: #f5eee7; color: #513827; font-weight: 600; }
 .choice-price { color: #9a7656; }
 .empty-hint { color: #a09284; font-size: 21rpx; }
 .extra-list { margin-top: 10rpx; }
@@ -249,16 +290,38 @@ function formatPrice(price) {
 .extra-name, .extra-price { display: block; }
 .extra-name { font-size: 23rpx; }
 .extra-price { margin-top: 7rpx; color: #a09284; font-size: 19rpx; }
-.check-mark { display: flex; width: 38rpx; height: 38rpx; align-items: center; justify-content: center; border: 1rpx solid #d8cabc; border-radius: 50%; color: #9b8b7c; }
-.check-mark--selected { border-color: #513827; background: #513827; color: #fff; }
-.bottom-bar { position: fixed; right: 0; bottom: 0; left: 0; display: flex; align-items: center; justify-content: space-between; padding: 20rpx 32rpx calc(20rpx + env(safe-area-inset-bottom)); background: rgba(255, 253, 250, .98); box-shadow: 0 -5rpx 20rpx rgba(63, 45, 31, .06); }
+.check-mark { display: flex; width: 48rpx; height: 48rpx; align-items: center; justify-content: center; border: 1rpx solid #d8cabc; border-radius: 50%; color: #9b8b7c; transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1); }
+.check-mark--selected { border-color: #513827; background: #513827; color: #fff; font-weight: 600; }
+.bottom-bar { position: fixed; right: 0; bottom: 0; left: 0; display: flex; align-items: center; justify-content: space-between; padding: 20rpx 32rpx calc(20rpx + env(safe-area-inset-bottom)); background: rgba(255, 253, 250, .98); backdrop-filter: blur(20rpx); box-shadow: 0 -5rpx 20rpx rgba(63, 45, 31, .06); }
 .total-label, .total-price { display: block; }
 .total-label { color: #a09284; font-size: 18rpx; }
 .total-price { margin-top: 5rpx; color: #543b29; font-size: 31rpx; font-weight: 600; }
-.confirm-button { padding: 20rpx 32rpx; border-radius: 40rpx; background: #513827; color: #fffaf4; font-size: 23rpx; }
+.confirm-button {
+  padding: 20rpx 32rpx;
+  border-radius: 40rpx;
+  background: #513827;
+  color: #fffaf4;
+  font-size: 23rpx;
+  transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:active:not(.confirm-button--disabled) {
+    background: #6b4a34;
+    transform: scale(0.96);
+  }
+}
 .action-buttons { display: flex; align-items: center; gap: 14rpx; }
-.cart-button { padding: 18rpx 20rpx; border: 1rpx solid #d8cabc; border-radius: 40rpx; color: #604a37; font-size: 21rpx; }
+.cart-button {
+  padding: 18rpx 20rpx;
+  border: 1rpx solid #d8cabc;
+  border-radius: 40rpx;
+  color: #604a37;
+  font-size: 21rpx;
+  transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:active {
+    background: #f5f0ea;
+    transform: scale(0.96);
+  }
+}
 .confirm-button--disabled { opacity: .6; }
-.state-card { display: flex; min-height: 55vh; flex-direction: column; align-items: center; justify-content: center; gap: 24rpx; color: #79695b; font-size: 23rpx; }
-.retry-button { padding: 12rpx 28rpx; border-radius: 28rpx; background: #513827; color: white; }
 </style>
