@@ -15,4 +15,5 @@ public class CategoryView {
     private String name;
     private String iconUrl;
     private Integer sort;
+    private String status;
 }

@@ -8,6 +8,7 @@ const router = createRouter({
     { path: '/', redirect: '/dashboard' },
     { path: '/dashboard', name: 'dashboard', component: () => import('../views/dashboard/index.vue'), meta: { title: '工作台' } },
     { path: '/products', name: 'products', component: () => import('../views/products/index.vue'), meta: { title: '商品管理' } },
+    { path: '/categories', name: 'categories', component: () => import('../views/categories/index.vue'), meta: { title: '分类管理' } },
     { path: '/:pathMatch(.*)*', redirect: '/dashboard' },
   ],
 })

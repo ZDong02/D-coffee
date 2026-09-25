@@ -2,6 +2,10 @@ import http from './http.js'
 
 export const adminLogin = (credentials) => http.post('/auth/admin/login', credentials)
 export const fetchCategories = () => http.get('/categories')
+export const fetchAdminCategories = () => http.get('/admin/categories')
+export const createCategory = (data) => http.post('/admin/categories', data)
+export const updateCategory = (id, data) => http.put(`/admin/categories/${id}`, data)
+export const updateCategoryStatus = (id, status) => http.patch(`/admin/categories/${id}/status`, { status })
 export const fetchProducts = (params) => http.get('/admin/products', { params })
 export const fetchProduct = (id) => http.get(`/admin/products/${id}`)
 export const createProduct = (data) => http.post('/admin/products', data)

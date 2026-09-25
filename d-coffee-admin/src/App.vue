@@ -6,6 +6,7 @@
       <el-menu :default-active="$route.path" router class="admin-menu">
         <el-menu-item index="/dashboard"><el-icon><Odometer /></el-icon><span>工作台</span></el-menu-item>
         <el-menu-item index="/products"><el-icon><CoffeeCup /></el-icon><span>商品管理</span></el-menu-item>
+        <el-menu-item index="/categories"><el-icon><Grid /></el-icon><span>分类管理</span></el-menu-item>
       </el-menu>
       <div class="aside-note">D-COFFEE 管理后台</div>
     </el-aside>
@@ -28,7 +29,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { CoffeeCup, Odometer } from '@element-plus/icons-vue'
+import { CoffeeCup, Grid, Odometer } from '@element-plus/icons-vue'
 import { ADMIN_KEY, TOKEN_KEY } from './api/http.js'
 
 const router = useRouter()
