@@ -162,6 +162,14 @@
         UPDATE dc_product SET stock = stock + #{delta}
         WHERE id = #{id} AND deleted = 0 AND stock + #{delta} &gt;= 0
     </update>
+    <update id="reserveExtraStock">
+        UPDATE dc_product_extra SET stock = stock - #{quantity}
+        WHERE id = #{id} AND status = 'ACTIVE' AND deleted = 0 AND stock &gt;= #{quantity}
+    </update>
+    <update id="releaseExtraStock">
+        UPDATE dc_product_extra SET stock = stock + #{quantity}
+        WHERE id = #{id} AND deleted = 0
+    </update>
     <insert id="insertInventoryLog">
         INSERT INTO dc_inventory_log (product_id, admin_id, quantity_delta, stock_before, stock_after, reason)
         VALUES (#{productId}, #{adminId}, #{delta}, #{beforeStock}, #{afterStock}, #{reason})

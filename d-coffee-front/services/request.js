@@ -36,6 +36,10 @@ export const getCart = (storeId) => request(`/user/cart?storeId=${encodeURICompo
 export const addCartItem = (data) => request('/user/cart/items', { method: 'POST', data })
 export const updateCartItem = (itemId, storeId, quantity) => request(`/user/cart/items/${itemId}?storeId=${storeId}`, { method: 'PATCH', data: { quantity } })
 export const removeCartItem = (itemId, storeId) => request(`/user/cart/items/${itemId}?storeId=${storeId}`, { method: 'DELETE' })
+export const createOrder = (data) => request('/user/orders', { method: 'POST', data })
+export const getOrders = () => request('/user/orders')
+export const getOrder = (orderId) => request(`/user/orders/${encodeURIComponent(orderId)}`)
+export const cancelOrder = (orderId) => request(`/user/orders/${encodeURIComponent(orderId)}/cancel`, { method: 'POST' })
 export const getProduct = (id) => request(`/products/${encodeURIComponent(id)}`)
 export const getProducts = (params = {}) => {
   const query = Object.entries(params)

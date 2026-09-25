@@ -11,6 +11,16 @@ SOURCE database/schema.sql;
 SOURCE database/seed.sql;
 ```
 
+## 已有数据库升级
+
+如果数据库此前已经按旧版本初始化，需要在 `dc_order`、`dc_order_item` 等订单表已存在的前提下，先执行订单库存预占迁移：
+
+```sql
+SOURCE database/migrations/2026-09-25-order-stock-reservation.sql;
+```
+
+该表用于记录下单时扣减的商品/加料库存，并保证取消未支付订单时只回补一次。迁移不会删除或重建业务数据；在执行前仍应按日常运维要求备份数据库。
+
 脚本不会写入真实管理员密码。应在 BCrypt 配置完成后，通过安全的账号开通流程创建首个管理员并保存密码摘要。
 
 项目后端提供本机交互式开通工具。确认数据库已初始化后，在后端目录运行：

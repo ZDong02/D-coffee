@@ -11,6 +11,7 @@ import java.util.List;
 public interface CartMapper {
     StoreView findStore(@Param("storeId") long storeId);
     Long findCartId(@Param("userId") long userId, @Param("storeId") long storeId);
+    Long lockCartId(@Param("userId") long userId, @Param("storeId") long storeId);
     int insertCart(@Param("userId") long userId, @Param("storeId") long storeId,
                    @Param("cartId") Long cartId);
     Long findItemId(@Param("cartId") long cartId, @Param("productId") long productId,

@@ -52,4 +52,4 @@ cd d-coffee-backend
 
 ## 当前功能
 
-后端已包含管理员登录、商品与分类读取、商品管理及库存调整 API；管理端包含登录和商品管理页面。用户端首页读取真实商品 API。规格/加料编辑、完整点单与订单流程仍待开发。阶段记录见[开发进度](docs/development.md)，技术边界见[系统架构](docs/architecture.md)。
+后端已包含管理员登录、商品与分类读取、商品管理及库存调整 API；管理端包含登录和商品管理页面。用户端已接入门店、购物车、下单、订单查看和未支付取消；支付服务尚未接入。已有数据库执行 `database/migrations/2026-09-25-order-stock-reservation.sql` 后才可使用订单库存预占与回补。阶段记录见[开发进度](docs/development.md)，技术边界见[系统架构](docs/architecture.md)。

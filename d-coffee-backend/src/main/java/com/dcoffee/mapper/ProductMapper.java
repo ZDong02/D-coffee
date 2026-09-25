@@ -27,6 +27,8 @@ public interface ProductMapper {
     int updateProduct(@Param("id") long id, @Param("product") ProductUpsertRequest product);
     int updateStatus(@Param("id") long id, @Param("status") String status);
     int adjustStock(@Param("id") long id, @Param("delta") int delta);
+    int reserveExtraStock(@Param("id") long id, @Param("quantity") int quantity);
+    int releaseExtraStock(@Param("id") long id, @Param("quantity") int quantity);
     int insertInventoryLog(@Param("productId") long productId, @Param("adminId") long adminId,
                            @Param("delta") int delta, @Param("beforeStock") int beforeStock,
                            @Param("afterStock") int afterStock, @Param("reason") String reason);

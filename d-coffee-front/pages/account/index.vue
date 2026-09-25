@@ -64,7 +64,8 @@ function logout() {
       <text class="card-eyebrow">我的账户</text>
       <text class="welcome-title">{{ user.nickname || '咖啡用户' }}</text>
       <text class="account-phone">{{ user.phone }}</text>
-      <text class="account-note">账号已连接，可以继续浏览菜单。购物车功能正在开发中。</text>
+      <text class="account-note">账号已连接，可查看订单状态与管理未支付订单。</text>
+      <text class="primary-button orders-button" @tap="uni.navigateTo({ url: '/pages/orders/index' })">我的订单</text>
       <text class="primary-button logout-button" @tap="logout">退出登录</text>
     </view>
     <view v-else class="account-card">
@@ -107,6 +108,7 @@ function logout() {
 .primary-button { display: block; margin-top: 34rpx; padding: 23rpx; border-radius: 40rpx; background: #513827; color: #fffaf4; font-size: 23rpx; text-align: center; }
 .primary-button--disabled { opacity: .6; }
 .logout-button { margin-top: 38rpx; }
+.orders-button { margin-top: 24rpx; background: #806449; }
 .switch-mode { display: block; margin-top: 25rpx; color: #805d43; font-size: 21rpx; text-align: center; }
 .error-message { display: block; margin-top: 20rpx; color: #bc5b4c; font-size: 20rpx; }
 .security-note, .account-note { display: block; margin-top: 28rpx; color: #a09284; font-size: 18rpx; line-height: 1.6; }

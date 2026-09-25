@@ -11,6 +11,10 @@
         SELECT id FROM dc_cart WHERE user_id = #{userId} AND store_id = #{storeId} AND deleted = 0
         ORDER BY id DESC LIMIT 1
     </select>
+    <select id="lockCartId" resultType="long">
+        SELECT id FROM dc_cart WHERE user_id = #{userId} AND store_id = #{storeId} AND deleted = 0
+        ORDER BY id DESC LIMIT 1 FOR UPDATE
+    </select>
     <insert id="insertCart" useGeneratedKeys="true" keyProperty="cartId" keyColumn="id">
         INSERT INTO dc_cart (user_id, store_id, deleted) VALUES (#{userId}, #{storeId}, 0)
     </insert>

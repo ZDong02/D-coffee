@@ -51,6 +51,6 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addInterceptor(adminAuthorizationInterceptor)
                 .addPathPatterns("/admin/**");
         registry.addInterceptor(userAuthorizationInterceptor)
-                .addPathPatterns("/user/cart/**");
+                .addPathPatterns("/user/cart/**", "/user/orders/**");
     }
 }

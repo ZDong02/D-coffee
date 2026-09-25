@@ -1,13 +1,14 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
-import { getCart, removeCartItem, updateCartItem } from '../../services/request.js'
+import { createOrder, getCart, removeCartItem, updateCartItem } from '../../services/request.js'
 
 const cart = ref(null)
 const store = ref(uni.getStorageSync('dcoffee-store') || null)
 const loading = ref(false)
 const errorMessage = ref('')
 const updatingItemId = ref(null)
+const submittingOrder = ref(false)
 const amount = computed(() => Number(cart.value?.totalAmount || 0).toFixed(2))
 
 async function loadCart() {
@@ -60,6 +61,29 @@ async function removeItem(item) {
 function openLogin() { uni.navigateTo({ url: '/pages/account/index' }) }
 function openStorePicker() { uni.navigateTo({ url: '/pages/store/index' }) }
 
+async function checkout() {
+  if (submittingOrder.value || !cart.value?.items?.length || cart.value.storeStatus !== 'OPEN') return
+  const confirmed = await new Promise((resolve) => uni.showModal({
+    title: '确认提交订单',
+    content: `共 ${cart.value.totalQuantity} 件商品，合计 ¥${amount.value}。当前仅创建待支付订单，支付服务尚未接入。`,
+    confirmText: '提交订单',
+    success: (result) => resolve(result.confirm),
+    fail: () => resolve(false),
+  }))
+  if (!confirmed) return
+  submittingOrder.value = true
+  try {
+    const order = await createOrder({ storeId: store.value.id, remark: '' })
+    uni.showToast({ title: '订单已创建', icon: 'success' })
+    setTimeout(() => uni.navigateTo({ url: `/pages/orders/index?orderId=${order.id}` }), 300)
+  } catch (error) {
+    uni.showToast({ title: error.message || '提交失败，请检查购物车后重试', icon: 'none', duration: 3000 })
+    await loadCart()
+  } finally {
+    submittingOrder.value = false
+  }
+}
+
 onShow(loadCart)
 </script>
 
@@ -105,9 +129,11 @@ onShow(loadCart)
       </view>
       <view class="summary-bar">
         <view><text class="summary-caption">共 {{ cart.totalQuantity }} 件</text><text class="summary-price">¥{{ amount }}</text></view>
-        <text class="checkout-disabled">继续点单</text>
+        <text class="checkout-button" :class="{ 'checkout-button--disabled': cart.storeStatus !== 'OPEN' || submittingOrder }" @tap="checkout">
+          {{ submittingOrder ? '提交中…' : cart.storeStatus === 'OPEN' ? '提交订单' : '门店未营业' }}
+        </text>
       </view>
-      <text class="checkout-note">订单创建与支付尚未接入；购物车暂不支持结算。</text>
+      <text class="checkout-note">提交后会创建待支付订单并预占库存；支付功能暂未接入。</text>
     </template>
   </view>
 </template>
@@ -138,7 +164,8 @@ onShow(loadCart)
 .summary-caption, .summary-price { display: block; }
 .summary-caption { color: #a09284; font-size: 18rpx; }
 .summary-price { margin-top: 4rpx; color: #543b29; font-size: 29rpx; font-weight: 600; }
-.checkout-disabled { padding: 18rpx 36rpx; border-radius: 36rpx; background: #c8bdb2; color: #fff; font-size: 21rpx; }
+.checkout-button { padding: 18rpx 36rpx; border-radius: 36rpx; background: #513827; color: #fff; font-size: 21rpx; }
+.checkout-button--disabled { background: #c8bdb2; }
 .checkout-note { display: block; margin-top: 16rpx; color: #a09284; font-size: 18rpx; text-align: center; }
 .state-card { display: flex; min-height: 55vh; flex-direction: column; align-items: center; justify-content: center; gap: 18rpx; color: #918477; font-size: 22rpx; text-align: center; }
 .empty-icon { color: #cbb7a3; font-family: Georgia, serif; font-size: 100rpx; }

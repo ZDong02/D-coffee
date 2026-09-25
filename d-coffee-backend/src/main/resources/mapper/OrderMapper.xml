@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dcoffee.mapper.OrderMapper">
+    <insert id="insertOrder" useGeneratedKeys="true" keyProperty="order.id">
+        INSERT INTO dc_order (order_no, user_id, store_id, status, payment_status,
+            total_amount, discount_amount, pay_amount, remark, deleted)
+        VALUES (#{order.orderNo}, #{order.userId}, #{order.storeId}, 'PENDING_PAYMENT', 'UNPAID',
+            #{order.totalAmount}, 0.00, #{order.payAmount}, #{order.remark}, 0)
+    </insert>
+    <insert id="insertItem" useGeneratedKeys="true" keyProperty="item.id">
+        INSERT INTO dc_order_item (order_id, product_id, product_name_snapshot, product_image_snapshot,
+            base_price, unit_price, quantity, subtotal, deleted)
+        VALUES (#{item.orderId}, #{item.productId}, #{item.productName}, #{item.imageUrl},
+            #{item.basePrice}, #{item.unitPrice}, #{item.quantity}, #{item.subtotal}, 0)
+    </insert>
+    <insert id="insertItemOption">
+        INSERT INTO dc_order_item_option (order_item_id, selection_type, option_group_snapshot,
+            selected_name_snapshot, price_delta, deleted)
+        VALUES (#{itemId}, #{selectionType}, #{groupName}, #{selectedName}, #{priceDelta}, 0)
+    </insert>
+    <insert id="insertReservation">
+        INSERT INTO dc_order_stock_reservation
+            (order_id, order_item_id, reservation_type, product_id, extra_id, quantity, released)
+        VALUES (#{orderId}, #{itemId}, #{type}, #{productId}, #{extraId}, #{quantity}, 0)
+    </insert>
+    <update id="clearCart">
+        UPDATE dc_cart_item SET deleted = 1
+        WHERE cart_id = #{cartId} AND deleted = 0
+          AND EXISTS (SELECT 1 FROM dc_cart WHERE id = #{cartId} AND user_id = #{userId} AND deleted = 0)
+    </update>
+    <select id="findOrders" resultType="com.dcoffee.vo.OrderView">
+        SELECT o.id, o.order_no, o.store_id, s.name AS store_name, o.status, o.payment_status,
+               o.total_amount, o.discount_amount, o.pay_amount, o.remark, o.create_time
+        FROM dc_order o JOIN dc_store s ON s.id = o.store_id
+        WHERE o.user_id = #{userId} AND o.deleted = 0
+        ORDER BY o.create_time DESC, o.id DESC LIMIT 100
+    </select>
+    <select id="findOrder" resultType="com.dcoffee.vo.OrderView">
+        SELECT o.id, o.order_no, o.store_id, s.name AS store_name, o.status, o.payment_status,
+               o.total_amount, o.discount_amount, o.pay_amount, o.remark, o.create_time
+        FROM dc_order o JOIN dc_store s ON s.id = o.store_id
+        WHERE o.user_id = #{userId} AND o.id = #{orderId} AND o.deleted = 0
+    </select>
+    <select id="findItems" resultType="com.dcoffee.vo.OrderView$OrderItemView">
+        SELECT id, product_id, product_name_snapshot AS product_name,
+               product_image_snapshot AS image_url, base_price, unit_price, quantity, subtotal
+        FROM dc_order_item WHERE order_id = #{orderId} AND deleted = 0 ORDER BY id
+    </select>
+    <select id="findItemOptions" resultType="com.dcoffee.vo.CartOptionView">
+        SELECT id, selection_type, option_group_snapshot AS group_name,
+               selected_name_snapshot AS selected_name, price_delta
+        FROM dc_order_item_option WHERE order_item_id = #{orderItemId} AND deleted = 0 ORDER BY id
+    </select>
+    <select id="lockOrder" resultType="com.dcoffee.vo.OrderView">
+        SELECT id, status, payment_status FROM dc_order
+        WHERE user_id = #{userId} AND id = #{orderId} AND deleted = 0 FOR UPDATE
+    </select>
+    <select id="findReservations" resultType="com.dcoffee.vo.OrderStockReservationView">
+        SELECT order_item_id, reservation_type, product_id, extra_id, quantity
+        FROM dc_order_stock_reservation WHERE order_id = #{orderId} AND released = 0
+        ORDER BY id
+    </select>
+    <update id="markReservationsReleased">
+        UPDATE dc_order_stock_reservation SET released = 1 WHERE order_id = #{orderId} AND released = 0
+    </update>
+    <update id="cancelOrder">
+        UPDATE dc_order SET status = 'CANCELED', canceled_at = CURRENT_TIMESTAMP
+        WHERE user_id = #{userId} AND id = #{orderId} AND status = 'PENDING_PAYMENT'
+          AND payment_status = 'UNPAID' AND deleted = 0
+    </update>
+</mapper>
